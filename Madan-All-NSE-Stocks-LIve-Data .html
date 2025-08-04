@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Live Stocks V8</title>
+  <title>Live Stocks </title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+    <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #555; color: white }
     select, button, input { margin: 5px; padding: 6px; }
     h3 { margin-top: 30px; }
     #topBtn {
@@ -32,18 +32,18 @@
   #stocks table {
     border-collapse: collapse;
     width: 100%;
-    background: white;
+    background: #5d5d5d;
     font-size: 13px;
   }
 
   #stocks th, #stocks td {
-    border: 1px solid #ccc;
+    border: 1px solid #6a6a6a;
     padding: 6px 8px;
     text-align: center;
   }
 
   #stocks thead th {
-    background-color: #f8f8f8;
+    background-color: #878787;
     cursor: pointer;
     position: sticky;
     top: 0;
@@ -51,11 +51,11 @@
   }
 
   #stocks tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #878787;
   }
 
   #stocks tbody tr:hover {
-    background-color: #eef;
+    background-color: #42495f;
   }
 
 #averageType {
@@ -112,9 +112,9 @@
 <input id="search" placeholder="Search symbol or group..." />
 <br>
 
-<span id="stockCount" style="margin-top:10px; font-size:14px; color:#555;"></span>
+<span id="stockCount" style="margin-top:10px; font-size:14px; color:white;"></span>
 
-<p id="loadingStatus" style="font-size:14px; color:#666; margin-top: 10px;"></p>
+<p id="loadingStatus" style="font-size:14px; color:white; margin-top: 10px;"></p>
 
 <div id="stocks"></div>
 
@@ -126,7 +126,7 @@ let currentSortAsc = true;
 
 
 const firebaseConfig = {
-  databaseURL: "https://total-trades-stocks-data-default-rtdb.asia-southeast1.firebasedatabase.app"
+  databaseURL: "https://tradingviewfetch-7928b-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -146,8 +146,12 @@ const allColumns = [
   { label: "Free Float %", key: "FreeFloatPercent", visible: false },
   { label: "Beta", key: "Beta", visible: false },
   { label: "Rel Vol (10D)", key: "RelVol10D", visible: true },
-  { label: "Rel Vol (Time)", key: "RelVatTime", visible: true }
-   
+  { label: "Rel Vol (Time)", key: "RelVatTime", visible: true },
+  { label: "AvgVol10D", key: "AvgVol10Day", visible: true },
+   { label: "Volatility", key: "VolatilityD", visible: true },
+
+
+
 ];
 
 
@@ -265,7 +269,11 @@ async function getData() {
         FreeFloatPercent: parseFloat(d.freeFloatPercent) || 0,
         Beta: parseFloat(d.beta) || 0,
         RelVol10D: parseFloat(d.relVolume10D) || 0,
-        RelVatTime:parseFloat(d.relVolume5Min) || 0
+        RelVatTime:parseFloat(d.relVolume5Min) || 0,
+        RawAvgVol10Day:parseFloat(d.AvgVol10Day) || 0,
+        AvgVol10Day: (parseFloat(d.AvgVol10Day) || 0 || 1) / (parseFloat(d.totalTradedVolume) || 0),
+        VolatilityD:parseFloat(d.VolatilityD) || 0,
+
       };
     });
 
@@ -364,6 +372,7 @@ function render() {
       else if (col.key === "MarketCap") val = (val / 1e7).toFixed(2); // Convert to Cr
       else if (col.key === "Volume" || col.key === "FreeFloat") val = val.toLocaleString();
       else if (typeof val === 'number') val = val.toFixed(2);
+      else if (col.key === "AvgVol10Day") val = val.toFixed(2);
 
       const td = document.createElement("td");
       td.innerText = val;
